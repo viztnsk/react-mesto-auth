@@ -46,6 +46,14 @@ class Api {
     removeLike(card) {
       return this._fetch(`/cards/${card._id}/likes`, "DELETE")
     }
+    changeLikeCardStatus(cardId, isLiked) {
+      if (isLiked) {
+        return this._fetch(`/cards/${cardId}/likes`, "PUT")
+      }
+      else {
+        return this._fetch(`/cards/${cardId}/likes`, "DELETE")
+      }
+    }
   }
 const api = new Api ({
     url: 'https://mesto.nomoreparties.co/v1/cohort-52',
