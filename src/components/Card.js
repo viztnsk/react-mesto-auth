@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { CurrentUserContext } from '../contexts/CurrentUserContext.js'
 import Main from './Main.js';
+import App from './App.js';
 
-function Card({card, onCardClick, onCardLike, onCardDelete}) {
+function Card({ card, onCardClick, onCardLike, onCardDelete }) {
   const currentUser = React.useContext(CurrentUserContext);
 
   const isOwn = card.owner._id === currentUser._id;
@@ -13,7 +14,7 @@ function Card({card, onCardClick, onCardLike, onCardDelete}) {
   const cardLikeButtonClassName = `like-button ${isLiked ? 'like-button_active' : ''}`;
   return (
     <article className="element">
-      <button className="image-button" type="button" onClick={() => onCardClick(card)}>
+      <button className="image-button" type="button" onClick={() => onCardClick(card)} >
         <img className="element__image" src={card.link} alt={card.name}/>
       </button>
       <button className="delete-button" className={cardDeleteButtonClassName} onClick={() => onCardDelete(card)} type="button"></button>
