@@ -17,7 +17,7 @@ function Card({ card, onCardClick, onCardLike, onCardDelete }) {
       <button className="image-button" type="button" onClick={() => onCardClick(card)} >
         <img className="element__image" src={card.link} alt={card.name}/>
       </button>
-      <button className="delete-button" className={cardDeleteButtonClassName} onClick={() => onCardDelete(card)} type="button"></button>
+      <button className={cardDeleteButtonClassName} onClick={() => onCardDelete(card)} type="button"></button>
       <div className="element__info">
         <h2 className="element__title">{card.name}</h2>
         <div className="element__likes">

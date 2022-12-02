@@ -7,7 +7,10 @@ import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
 function AddPlacePopup(props) {
   const [cardName, setCardName] = React.useState('');
   const [cardLink, setCardLink] = React.useState('');
-
+  React.useEffect(() => {
+    setCardName('');
+    setCardLink('');
+}, [props.isOpen]);
   function handleCardNameChange(e) {
     setCardName(e.target.value)
   }
@@ -20,8 +23,6 @@ function AddPlacePopup(props) {
       name: cardName,
       link: cardLink,
     })
-    setCardName('');
-    setCardLink('');
   }
 
   return(

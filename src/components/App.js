@@ -24,13 +24,13 @@ function App() {
   const [isAddPlacePopupOpen, setAddPopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setAvatarPopupOpen] = useState(false);
   const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
-  const [selectedCard, setImagePopupOpen] = useState();
+  const [selectedCard, setselectedCard] = useState();
   const closeAllPopups = () => {
     setEditPopupOpen(false)
     setAddPopupOpen(false)
     setAvatarPopupOpen(false)
     setDeletePopupOpen(false)
-    setImagePopupOpen(null)
+    setselectedCard(null)
   }
   useEffect(() => {
     api.getUser()
@@ -94,7 +94,7 @@ function App() {
         onAddPlace={() => setAddPopupOpen(true)} 
         onEditAvatar={() => setAvatarPopupOpen(true)}
         isDeletePopup={() => setDeletePopupOpen(true)}
-        onCardClick={(card) => setImagePopupOpen(card)}
+        onCardClick={(card) => setselectedCard(card)}
         onCardLike={handleCardLike}
         onCardDelete={handleCardDelete}
         cards={cards}
