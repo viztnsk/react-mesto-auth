@@ -1,8 +1,10 @@
 .footer {
+  display: none;
   max-width: 880px;
   align-content: center;
   margin: 67px auto 0;
   padding-bottom: 60px;
+  visibility: hidden;
 }
 @media screen and (max-width: 980px) { 
   .footer {

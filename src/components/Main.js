@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import editButton from '../images/editButton.svg';
 import addButton from '../images/addButton.svg';
 import editAvatarButton from '../images/editAvatarButton.svg'
 import Card from './Card.js'
-import api from '../utils/Api.js';
 import { CurrentUserContext } from '../contexts/CurrentUserContext.js'
 
 function Main(props) { 

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route, Switch, useHistory } from 'react-router-dom';
 import { Redirect } from 'react-router';
 import api from '../utils/Api.js';
+import * as auth from '../auth.js'
 import Header from './Header.js';
 import Main from './Main.js';
 import Footer from './Footer.js';
@@ -13,31 +14,37 @@ import EditProfilePopup from './EditProfilePopup.js'
 import EditAvatarPopup from './EditAvatarPopup.js'
 import AddPlacePopup from './AddPlacePopup.js'
 import ProtectedRoute from "./PretectedRoute.js";
+import InfoTooltip from './InfoTooltip.js'
 import { CurrentUserContext } from '../contexts/CurrentUserContext.js'
 //import { render } from "@testing-library/react";
 
 
 
 function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [registered, setRegistred] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(true);
   const [currentUser, setCurrentUser] = useState({
     name: '',
     about: '',
     avatar: ''
   })
-  //const [avatar, setAvatar] = useState('')
+  const [status, setStatus] = useState(false);
+  const [email, setEmail] = useState('');
+  const history = useHistory();
+
   const [cards, setCards] = useState([]) 
   const [isEditProfilePopupOpen, setEditPopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setAddPopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setAvatarPopupOpen] = useState(false);
   const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
+  const [isInfoTooltipOpen, setInfoTooltipOpen] = useState(false);
   const [selectedCard, setselectedCard] = useState();
+  
   const closeAllPopups = () => {
     setEditPopupOpen(false)
     setAddPopupOpen(false)
     setAvatarPopupOpen(false)
     setDeletePopupOpen(false)
+    setInfoTooltipOpen(false)
     setselectedCard(null)
   }
   useEffect(() => {
@@ -53,6 +60,59 @@ function App() {
   .catch(err => console.log(err))
   }, [])
 
+  function handleLogin() {
+    setLoggedIn(true);
+  }
+
+  useEffect(() => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        auth.getContent(token).then((res) => {
+          if (res) {
+            setEmail(res.data.email)
+            handleLogin()
+          }
+        })
+        .catch((err) => console.log(err))
+        .finally(() => history.push("/"))
+      }
+  }, [loggedIn, history, email] )
+
+ 
+  function handleLoginSubmit(values) {
+    auth.authorize(values.email, values.password)
+    .then((res) => {
+      localStorage.setItem('token', res.token)
+      handleLogin();
+    })
+    .then(() => history.push('/'))
+    .catch(err => console.log(err));
+    }
+
+  function handleRegisterSubmit(values) {
+    auth.register(values.email, values.password)
+    .then((res) => {
+      if (res) {
+        setStatus(true)
+        handleInfoTooltipOpen()
+      }})
+      .then(() => {
+        history.push('/sign-in')
+      })
+      .catch((err) => {
+        console.log(err)
+        setStatus(false)
+        handleInfoTooltipOpen()
+      })
+  }
+  function handleInfoTooltipOpen() {
+    setInfoTooltipOpen(true)
+  }
+
+  function handleSignOut() {
+    localStorage.removeItem('token')
+    setEmail('')
+  }
   function handleCardLike(card) {
     const isLiked = card.likes.some(i => i._id === currentUser._id);
     api.changeLikeCardStatus(card._id, !isLiked)
@@ -98,11 +158,12 @@ function App() {
     <BrowserRouter>
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
-        <Header loggedIn={loggedIn} registered={registered} //email={email}
-        />
+        <Header email={email} onSignOut={handleSignOut}/>
         <Switch>
           <ProtectedRoute
-            path='/'
+            exact path="/"
+            loggedIn={loggedIn}
+            component={Main}
             onEditProfile={() => setEditPopupOpen(true)} 
             onAddPlace={() => setAddPopupOpen(true)} 
             onEditAvatar={() => setAvatarPopupOpen(true)}
@@ -110,24 +171,24 @@ function App() {
             onCardClick={(card) => setselectedCard(card)}
             onCardLike={handleCardLike}
             onCardDelete={handleCardDelete}
-            cards={cards}
-            component={Main} />
+            cards={cards} />
           <Route path="/sign-in">
-            <Login />
+            <Login onLogin={handleLoginSubmit}/>
           </Route>
           <Route path="/sign-up">
-            <Register />
+            <Register onRegister={handleRegisterSubmit}/>
           </Route>
           <Route>
             {loggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
           </Route>
         </Switch>
-      <Footer />
-      <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser} />
-      <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlaceSubmit} />
-      <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateAvatar} />
-      <PopupWithForm name='deletion' title='Вы уверены?' button="Да" isOpen={isDeletePopupOpen}  />
-      <ImagePopup card={selectedCard} onClose={closeAllPopups} />     
+        <Footer />
+        <InfoTooltip isOpen={isInfoTooltipOpen} onClose={closeAllPopups} status={status}/>
+        <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser} />
+        <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlaceSubmit} />
+        <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateAvatar} />
+        <PopupWithForm name='deletion' title='Вы уверены?' button="Да" isOpen={isDeletePopupOpen}  />
+        <ImagePopup card={selectedCard} onClose={closeAllPopups} />     
       </div>   
     </CurrentUserContext.Provider>
     </BrowserRouter>
