@@ -1,7 +1,7 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import InfoTooltip from './InfoTooltip';
-import * as auth from '../auth.js'
+import * as auth from '../utils/auth.js'
 import useForm from '../hooks/useForm.js'
 
 function Login(props) {
@@ -14,7 +14,6 @@ function Login(props) {
       props.onLogin(values)
     }
   return (
-      <>
       <section className="auth">
         <div className='auth__container'>
           <section className='auth__form'>
@@ -29,8 +28,6 @@ function Login(props) {
           </section>
         </div>
       </section>
-      
-      </>
   )
 }
 

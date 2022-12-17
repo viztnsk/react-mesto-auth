@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter, Route, Switch, useHistory } from 'react-router-dom';
+import { Route, Switch, useHistory } from 'react-router-dom';
 import { Redirect } from 'react-router';
 import api from '../utils/Api.js';
-import * as auth from '../auth.js'
+import * as auth from '../utils/auth.js'
 import Header from './Header.js';
 import Main from './Main.js';
 import Footer from './Footer.js';
@@ -21,7 +21,7 @@ import { CurrentUserContext } from '../contexts/CurrentUserContext.js'
 
 
 function App() {
-  const [loggedIn, setLoggedIn] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState({
     name: '',
     about: '',
@@ -48,45 +48,54 @@ function App() {
     setselectedCard(null)
   }
   useEffect(() => {
-    api.getUser()
+    if (loggedIn) {
+      api.getUser()
     .then((user) => setCurrentUser(user))
     .catch(err => console.log(err))
-  }, [])
+    }
+  }, [loggedIn])
+  
   useEffect(() => {
+    if (loggedIn) {
     api.getCards()
-    .then((cards) => {
-      setCards(cards);
-  })
-  .catch(err => console.log(err))
-  }, [])
+    .then((cards) => setCards(cards))
+    .catch(err => console.log(err))
+    }
+  }, [loggedIn])
 
-  function handleLogin() {
+  function handleLogin(email) {
     setLoggedIn(true);
+    setEmail(email)
   }
 
   useEffect(() => {
+    if (loggedIn) {
       const token = localStorage.getItem('token');
       if (token) {
         auth.getContent(token).then((res) => {
           if (res) {
             setEmail(res.data.email)
-            handleLogin()
+            handleLogin(res.data.email)
           }
         })
         .catch((err) => console.log(err))
         .finally(() => history.push("/"))
       }
+    }
   }, [loggedIn, history, email] )
 
- 
   function handleLoginSubmit(values) {
     auth.authorize(values.email, values.password)
     .then((res) => {
       localStorage.setItem('token', res.token)
-      handleLogin();
+      handleLogin(values.email);
     })
     .then(() => history.push('/'))
-    .catch(err => console.log(err));
+    .catch((err) => {
+      console.log(err)
+      setStatus(false)
+      handleInfoTooltipOpen()
+    });
     }
 
   function handleRegisterSubmit(values) {
@@ -155,7 +164,6 @@ function App() {
   }
   return (
     <>
-    <BrowserRouter>
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
         <Header email={email} onSignOut={handleSignOut}/>
@@ -183,7 +191,7 @@ function App() {
           </Route>
         </Switch>
         <Footer />
-        <InfoTooltip isOpen={isInfoTooltipOpen} onClose={closeAllPopups} status={status}/>
+        <InfoTooltip isOpen={isInfoTooltipOpen} onClose={closeAllPopups} status={status} success={"Вы успешно зарегистрировались!"} fail={"Что-то пошло не так! Попробуйте ещё раз."}/>
         <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser} />
         <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlaceSubmit} />
         <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateAvatar} />
@@ -191,7 +199,6 @@ function App() {
         <ImagePopup card={selectedCard} onClose={closeAllPopups} />     
       </div>   
     </CurrentUserContext.Provider>
-    </BrowserRouter>
     </>
   );
 }
