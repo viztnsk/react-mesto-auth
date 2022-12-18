@@ -69,7 +69,6 @@ function App() {
   }
 
   useEffect(() => {
-    if (loggedIn) {
       const token = localStorage.getItem('token');
       if (token) {
         auth.getContent(token).then((res) => {
@@ -81,7 +80,6 @@ function App() {
         .catch((err) => console.log(err))
         .finally(() => history.push("/"))
       }
-    }
   }, [loggedIn, history, email] )
 
   function handleLoginSubmit(values) {
@@ -163,7 +161,6 @@ function App() {
     .catch(err => console.log(err))
   }
   return (
-    <>
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
         <Header email={email} onSignOut={handleSignOut}/>
@@ -199,7 +196,6 @@ function App() {
         <ImagePopup card={selectedCard} onClose={closeAllPopups} />     
       </div>   
     </CurrentUserContext.Provider>
-    </>
   );
 }
 
